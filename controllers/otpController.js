@@ -1,6 +1,8 @@
 import axios from 'axios';
+import FormData from 'form-data';
+
 const generateOTP = () => {
-    return Math.floor(100000 + Math.random() * 900000);
+    return Math.floor(1000 + Math.random() * 9000);
 };
 
 const otpStorage = {};
@@ -13,14 +15,14 @@ const requestOTP = async (req, res) => {
     const { phone } = req.body;
   
     if (!phone) {
-      return res.status(400).json({ message: 'Phone number is required' });
+      return res.status(400).json({ success: "False", message: 'Phone number is required' });
     }
   
     const otp = generateOTP();
     otpStorage[phone] = otp;
     const message = `${otp} is your OTP for verification.`;
     const numbers = phone;
-  
+
     try {
       const params = {
         authorization: process.env.FAST2SMS_API_KEY,
@@ -30,8 +32,14 @@ const requestOTP = async (req, res) => {
         route: 'dlt',
         numbers,
       };
-      const response = await fast2smsApi.get('/bulkV2', { params });
-  
+
+      const form = new FormData();
+      Object.keys(params).forEach(key => form.append(key, params[key]));
+
+      const response = await fast2smsApi.post('/bulkV2', form, {
+        headers: form.getHeaders(),
+      });
+
       if (response.data.return) {
         return res.status(200).json({ success: "True", message: 'OTP sent successfully' });
       } else {
@@ -46,13 +54,13 @@ const requestOTP = async (req, res) => {
 const verifyOTP = (req, res) => {
     const { phone, otp } = req.body;
     if (!phone || !otp) {
-      return res.status(400).json({ message: 'Phone number and OTP are required' });
+      return res.status(400).json({ success: "False", message: 'Phone number and OTP are required' });
     }
 
     const storedOTP = otpStorage[phone];
 
     if (!storedOTP) {
-      return res.status(400).json({ message: 'OTP expired or not requested yet.' });
+      return res.status(400).json({ success: "False", message: 'OTP expired or not requested yet.' });
     }
 
     if (parseInt(otp) === storedOTP) {
