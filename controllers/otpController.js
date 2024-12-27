@@ -14,7 +14,7 @@ const requestOTP = async (req, res) => {
     const { phone } = req.body;
 
     if (!phone) {
-      return res.status(400).json({ success: "False", message: 'Phone number is required' });
+      return res.status(400).json({ success: "false", message: 'Phone number is required' });
     }
 
     const otp = generateOTP();
@@ -34,33 +34,33 @@ const requestOTP = async (req, res) => {
       const response = await fast2smsApi.get('/bulkV2', { params });
 
       if (response.data.return) {
-        return res.status(200).json({ success: "True", message: 'OTP sent successfully' });
+        return res.status(200).json({ success: "true", message: 'OTP sent successfully' });
       } else {
-        return res.status(500).json({ success: "False", message: 'Failed to send OTP using fast2sms' });
+        return res.status(500).json({ success: "false", message: 'Failed to send OTP using fast2sms' });
       }
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ success: "False", message: 'Failed to send OTP' });
+      return res.status(500).json({ success: "false", message: 'Failed to send OTP' });
     }
 };
 
 const verifyOTP = (req, res) => {
     const { phone, otp } = req.body;
     if (!phone || !otp) {
-      return res.status(400).json({ success: "False", message: 'Phone number and OTP are required' });
+      return res.status(400).json({ success: "false", message: 'Phone number and OTP are required' });
     }
 
     const storedOTP = otpStorage[phone];
 
     if (!storedOTP) {
-      return res.status(400).json({ success: "False", message: 'OTP expired or not requested yet.' });
+      return res.status(400).json({ success: "false", message: 'OTP expired or not requested yet.' });
     }
 
     if (parseInt(otp) === storedOTP) {
       delete otpStorage[phone];
-      return res.status(200).json({ success: "True", message: 'OTP verified successfully' });
+      return res.status(200).json({ success: "true", message: 'OTP verified successfully' });
     } else {
-      return res.status(400).json({ success: "False", message: 'Invalid OTP' });
+      return res.status(400).json({ success: "false", message: 'Invalid OTP' });
     }
 };
 
