@@ -1,5 +1,4 @@
 import axios from 'axios';
-import FormData from 'form-data';
 
 const generateOTP = () => {
     return Math.floor(1000 + Math.random() * 9000);
@@ -13,11 +12,11 @@ const fast2smsApi = axios.create({
 
 const requestOTP = async (req, res) => {
     const { phone } = req.body;
-  
+
     if (!phone) {
       return res.status(400).json({ success: "False", message: 'Phone number is required' });
     }
-  
+
     const otp = generateOTP();
     otpStorage[phone] = otp;
     const message = `${otp} is your OTP for verification.`;
@@ -32,13 +31,7 @@ const requestOTP = async (req, res) => {
         route: 'dlt',
         numbers,
       };
-
-      const form = new FormData();
-      Object.keys(params).forEach(key => form.append(key, params[key]));
-
-      const response = await fast2smsApi.post('/bulkV2', form, {
-        headers: form.getHeaders(),
-      });
+      const response = await fast2smsApi.get('/bulkV2', { params });
 
       if (response.data.return) {
         return res.status(200).json({ success: "True", message: 'OTP sent successfully' });
