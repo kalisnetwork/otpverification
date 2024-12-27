@@ -33,15 +33,16 @@ const requestOTP = async (req, res) => {
       const response = await fast2smsApi.get('/bulkV2', { params });
   
       if (response.data.return) {
-        return res.status(200).json({ message: 'OTP sent successfully', phone });
+        return res.status(200).json({ success: "True", message: 'OTP sent successfully' });
       } else {
-          return res.status(500).json({ message: 'Failed to send OTP using fast2sms' });
+        return res.status(500).json({ success: "False", message: 'Failed to send OTP using fast2sms' });
       }
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ message: 'Failed to send OTP' });
+      return res.status(500).json({ success: "False", message: 'Failed to send OTP' });
     }
-  };
+};
+
 const verifyOTP = (req, res) => {
     const { phone, otp } = req.body;
     if (!phone || !otp) {
@@ -55,10 +56,10 @@ const verifyOTP = (req, res) => {
     }
 
     if (parseInt(otp) === storedOTP) {
-      delete otpStorage[phone]
-      return res.status(200).json({ message: 'OTP verified successfully' });
+      delete otpStorage[phone];
+      return res.status(200).json({ success: "True", message: 'OTP verified successfully' });
     } else {
-      return res.status(400).json({ message: 'Invalid OTP' });
+      return res.status(400).json({ success: "False", message: 'Invalid OTP' });
     }
 };
 
